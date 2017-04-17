@@ -1,16 +1,17 @@
 import chanutils.torrent
-import sys
+import cherrypy
 from chanutils import select_all, select_one, get_attr, post_doc
 from chanutils import get_doc, get_json, series_season_episode
 from chanutils import get_text, get_text_content, replace_entity, byte_size
 from playitem import TorrentPlayItem, ShowMoreItem, PlayItemList
 
-_BASE_URL = "https://eztv.ag"
-_SEARCH_URL = _BASE_URL + "/search/"
+_BASE_URL = "http://www.shanaproject.com"
+_SEARCH_URL = _BASE_URL + "/search/?title="
 
 _FEEDLIST = [
   {'title':'Latest', 'url':'https://www.shanaproject.com/'},
-  {'title':'All Shows', 'url':'https://www.shanaproject.com/'},
+  {'title': 'Season Shows', 'url':'http://www.shanaproject.com/season/list/?sort=date'},
+  {'title':'My Shows', 'url':'http://www.shanaproject.com/user/pseudoanime/'},
 ]
 
 def name():
@@ -42,19 +43,25 @@ def showmore(show_url):
   return _extract_html(doc)
 
 def _extract_showlist(doc):
-  rtree = select_all(doc, 'div[name="release_row"]')
-  img = None
-  results = PlayItemList()
-  for l in rtree:
-    #el = select_one(l, 'a.thread_link')
-    #title = get_text(el)
-    #url = get_attr(el, 'href')
-    #el = select_one(l, 'b')
-    #rating = get_text(el)
-    #subtitle = "Rating: " + rating
-    item = ShowMoreItem("est", null, "est", "test")
-    results.add()
-  return results
+	rtree = select_all(doc, 'tr[class="follow_list_row"]')
+	img = None
+	results = PlayItemList()
+	if (rtree is None or len(rtree)==0):
+		rtree = select_all(doc, 'div[class="header_display_box_info"]')
+		for l in rtree:
+			el = select_one(l, 'span[class="header_info_block"]')
+			title = get_text_content(el)
+			url = get_attr(select_one(el, 'a'), 'href')
+			item = ShowMoreItem(title, None, url, None)
+			results.add(item)
+	else:
+	  for l in rtree:
+		el = select_one(l, 'td:nth-child(1)')
+		title = get_text_content(el)
+		url = get_attr(select_one(el, 'a'), 'href')
+		item = ShowMoreItem(title, None, url, None)
+		results.add(item)
+	return results
 
 def _extract_html(doc):
   rtree = select_all(doc, 'div[class="release_block"]')
