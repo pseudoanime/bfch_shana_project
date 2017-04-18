@@ -1,5 +1,4 @@
 import chanutils.torrent
-import cherrypy
 from chanutils import select_all, select_one, get_attr, post_doc
 from chanutils import get_doc, get_json, series_season_episode
 from chanutils import get_text, get_text_content, replace_entity, byte_size
@@ -47,19 +46,22 @@ def _extract_showlist(doc):
 	img = None
 	results = PlayItemList()
 	if (rtree is None or len(rtree)==0):
-		rtree = select_all(doc, 'div[class="header_display_box_info"]')
+		rtree = select_all(doc, 'div[class="header_display_box season_right"], div[class="header_display_box season_left"]')
 		for l in rtree:
+			attr = get_attr(l, "style")
+			img = "http:" + attr.split('(')[1].split(')')[0]
 			el = select_one(l, 'span[class="header_info_block"]')
 			title = get_text_content(el)
 			url = get_attr(select_one(el, 'a'), 'href')
-			item = ShowMoreItem(title, None, url, None)
+			item = ShowMoreItem(title, img, url, None)
 			results.add(item)
 	else:
 	  for l in rtree:
 		el = select_one(l, 'td:nth-child(1)')
 		title = get_text_content(el)
 		url = get_attr(select_one(el, 'a'), 'href')
-		item = ShowMoreItem(title, None, url, None)
+		img = '/img/icons/film.svg'
+		item = ShowMoreItem(title, img, url, None)
 		results.add(item)
 	return results
 
@@ -90,9 +92,6 @@ def _extract_html(doc):
 		img = '/img/icons/film.svg'
 		el = select_one(l, 'a[type="application/x-bittorrent"]')
 		url = "http://www.shanaproject.com/" + get_attr(el, 'href')
-		#if url is None:
-		  #continue
-		#subs = series_season_episode(title)
 		size = get_text(select_one(par, 'div[class="release_size release_last"]'))	
 		subs=None
 		subtitle = chanutils.torrent.subtitle(size, None, None)
