@@ -71,7 +71,7 @@ def _extract_html(doc):
   results = PlayItemList()
   count = 0
   for l in rtree:
-	if count<2:
+	if count<1:
 		count = count+1
 		continue
 	else:	
