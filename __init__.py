@@ -8,9 +8,9 @@ _BASE_URL = "http://www.shanaproject.com"
 _SEARCH_URL = _BASE_URL + "/search/?title="
 
 _FEEDLIST = [
-  {'title':'Latest', 'url':'https://www.shanaproject.com/'},
-  {'title': 'Season Shows', 'url':'http://www.shanaproject.com/season/list/?sort=date'},
   {'title':'My Shows', 'url':'http://www.shanaproject.com/user/pseudoanime/'},
+  {'title': 'Season Shows', 'url':'http://www.shanaproject.com/season/list/?sort=date'},
+  {'title':'Latest', 'url':'https://www.shanaproject.com/'},
 ]
 
 def name():
@@ -27,10 +27,11 @@ def feedlist():
 
 def feed(idx):
   doc = get_doc(_FEEDLIST[idx]['url'], proxy=True)
-  if idx > 0:
-    return _extract_showlist(doc)
+  if idx == len(_FEEDLIST)-1:
+	  return _extract_html(doc)
   else:
-    return _extract_html(doc)
+	  return _extract_showlist(doc)
+    
 
 def search(q):
   q = q.replace(' ', '-')
@@ -92,10 +93,11 @@ def _extract_html(doc):
 		img = '/img/icons/film.svg'
 		el = select_one(l, 'a[type="application/x-bittorrent"]')
 		url = "http://www.shanaproject.com/" + get_attr(el, 'href')
-		size = get_text(select_one(par, 'div[class="release_size release_last"]'))	
+		size = get_text_content(select_one(par, 'div[class="release_size release_last"]'))	
+		#size=0
 		subs=None
 		subtitle = chanutils.torrent.subtitle(size, None, None)
-		results.add(TorrentPlayItem(title, None,url,subtitle, subs=subs))
+		results.add(TorrentPlayItem(title,img,url,subtitle, subs=subs))
   return results
 
 def _extract_show(data):
