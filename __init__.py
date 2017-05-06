@@ -81,7 +81,7 @@ def _extract_html(doc):
 		if (release_profile is None or len(release_profile)==0):
 			release_profile = "SD"
 		el = select_one(par, 'a')	
-		episode_name = get_text(el)
+		episode_name = get_text(el).replace("(info)","")
 		
 		el = select_one(par, 'div[class="release_subber"]')
 		subber= get_text_content(select_one(el, 'div:nth-child(1)'))
@@ -94,7 +94,6 @@ def _extract_html(doc):
 		el = select_one(l, 'a[type="application/x-bittorrent"]')
 		url = "http://www.shanaproject.com/" + get_attr(el, 'href')
 		size = get_text_content(select_one(par, 'div[class="release_size release_last"]'))	
-		#size=0
 		subs=None
 		subtitle = chanutils.torrent.subtitle(size, None, None)
 		results.add(TorrentPlayItem(title,img,url,subtitle, subs=subs))
